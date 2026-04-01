@@ -1,0 +1,11 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Environment — contains DB credentials and JWT secret, NEVER upload!
+.env
+.env.*
+
+# Logs
+*.log
+logs/
