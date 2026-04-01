@@ -89,14 +89,16 @@ router.get('/top-products', authMiddleware, async (req, res) => {
 router.get('/revenue-by-category', authMiddleware, async (req, res) => {
   try {
     const [rows] = await db.query(`
-      SELECT p.category, SUM(s.total_amount) as revenue, COUNT(*) as orders
+      SELECT 
+        COALESCE(NULLIF(p.category, ''), 'Uncategorized') as category,
+        COALESCE(SUM(s.total_amount), 0) as revenue,
+        COUNT(*) as orders
       FROM sales s
       JOIN products p ON s.product_id = p.id
-      WHERE s.status = 'completed'
       GROUP BY p.category
       ORDER BY revenue DESC
     `);
-    res.json({ success: true, data: rows });
+    res.json({ success: true, data: rows.map(r => ({ ...r, revenue: parseFloat(r.revenue) })) });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error.', error: err.message });
   }

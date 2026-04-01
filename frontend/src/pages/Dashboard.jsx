@@ -3,7 +3,7 @@ import { FiTrendingUp, FiUsers, FiPackage, FiShoppingCart, FiAlertTriangle, FiCl
 import { MdAttachMoney } from 'react-icons/md';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, PieChart, Pie, Cell, Legend
+  BarChart, Bar, Cell
 } from 'recharts';
 import API from '../api/axios';
 import { format } from 'date-fns';
@@ -64,7 +64,7 @@ export default function Dashboard() {
         setKpis(kRes.data.data);
         setChartData(cRes.data.data.map(d => ({ ...d, date: format(new Date(d.date), 'MMM dd') })));
         setTopProducts(tRes.data.data);
-        setCategoryData(catRes.data.data);
+        setCategoryData(catRes.data.data.map(d => ({ ...d, revenue: parseFloat(d.revenue) })));
         setRecentActivity(actRes.data.data);
       } catch (err) {
         console.error(err);
@@ -122,12 +122,17 @@ export default function Dashboard() {
         <div className="chart-card">
           <h3>Revenue by Category</h3>
           <ResponsiveContainer width="100%" height={260}>
-            <PieChart>
-              <Pie data={categoryData} dataKey="revenue" nameKey="category" cx="50%" cy="50%" outerRadius={90} label={({ category, percent }) => `${category} ${(percent * 100).toFixed(0)}%`}>
-                {categoryData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-              </Pie>
-              <Tooltip formatter={(v) => `$${v.toLocaleString()}`} />
-            </PieChart>
+            <BarChart data={categoryData} layout="vertical">
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+              <XAxis type="number" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v.toLocaleString()}`} />
+              <YAxis dataKey="category" type="category" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} width={90} />
+              <Tooltip formatter={(v) => [`$${Number(v).toLocaleString()}`, 'Revenue']} />
+              <Bar dataKey="revenue" radius={[0, 4, 4, 0]}>
+                {categoryData.map((_, i) => (
+                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                ))}
+              </Bar>
+            </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
