@@ -12,51 +12,46 @@ jobs:
     name: Backend (Node.js)
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: ./backend
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js 18
         uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
-          cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
+          node-version: '18'
 
-      - name: Install dependencies
+      - name: Install backend dependencies
+        working-directory: ./backend
         run: npm install
 
       - name: Check server file exists
-        run: test -f server.js && echo "✅ server.js found" || echo "❌ server.js missing"
+        working-directory: ./backend
+        run: test -f server.js && echo "server.js found" || echo "server.js missing"
 
   # ── Frontend Job ─────────────────────────────────────────
   frontend:
     name: Frontend (React + Vite)
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: ./frontend
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          node-version: '22'
 
-      - name: Install dependencies
+      - name: Verify Node.js version
+        run: node --version
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
         run: npm install
 
-      - name: Build project
+      - name: Build frontend
+        working-directory: ./frontend
         run: npm run build
 
       - name: Upload build artifact
